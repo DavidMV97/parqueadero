@@ -1,3 +1,5 @@
+import tkinter as tk
+from tkinter import messagebox
 from collections import namedtuple
 
 Puesto = namedtuple('Puesto', 'nivel numero')
@@ -25,12 +27,6 @@ class Stack:
         return self.stack.pop()
 
 
-class Libre:
-    def __init__(self, nivel, numero):
-        self.nivel = nivel
-        self.numero = numero
-
-
 def crear_parqueadero(numero_niveles, cantidad_puestos):
     parqueadero = Stack()
     cont_niveles = 1
@@ -55,25 +51,35 @@ def ingresar_puesto_libre(parqueadero, puesto):
 
 
 def mostrar_parqueadero(parqueadero, puestos_ocupados):
+    window = tk.Tk()
+    window.title("Parqueadero")
+
+    text_widget = tk.Text(window, height=10, width=70)
+    text_widget.pack()
+
     total = []
     total.append(parqueadero.stack)
     total.append(puestos_ocupados)
-    
+
     current_nivel = None
     for row in total:
         for item in row:
             if isinstance(item, dict):
                 key, value = list(item.items())[0]
                 if key.nivel != current_nivel:
-                    print()  # Salto de línea si el nivel ha cambiado
+                    text_widget.insert(tk.END, "\n")  # Salto de línea si el nivel ha cambiado
                     current_nivel = key.nivel
-                print(f"Nivel {key.nivel} {value}", end=" ")
+                text_widget.insert(tk.END, f"Nivel {key.nivel} {value} ", "nivel")
             elif isinstance(item, Puesto):
                 if item.nivel != current_nivel:
-                    print()  # Salto de línea si el nivel ha cambiado
+                    text_widget.insert(tk.END, "\n")  # Salto de línea si el nivel ha cambiado
                     current_nivel = item.nivel
-                print(f"Nivel {item.nivel} Puesto {item.numero}", end=" ")
-    
+                text_widget.insert(tk.END, f"Nivel {item.nivel} Puesto {item.numero} ", "puesto")
+
+    # Configuración de colores
+    text_widget.tag_config("nivel", foreground="blue")  # Color para los niveles
+    text_widget.tag_config("puesto", foreground="black")  # Color para los puestos
+    window.mainloop()
 
 
 def menu():
@@ -95,11 +101,22 @@ while True:
     if opcion == "1":
         puesto_libre = obtener_puesto_libre(parqueadero)
         if puesto_libre:
-            my_placa = input('Ingrese la placa del vehiculo :')
-            print(f"Se ha asignado el puesto {puesto_libre} al vehículo.")
-            puestos_ocupados.insert(0,{puesto_libre: my_placa})
+            my_placa = input('Ingrese la placa del vehiculo: ')
+            placa_ya_ingresada = False
+            for puestos in puestos_ocupados:
+                if my_placa in puestos.values():
+                    placa_ya_ingresada = True
+                    break
+        
+            if placa_ya_ingresada:
+                messagebox.showwarning("Placa ya ingresada", f"La placa {my_placa} ya ha sido ingresada anteriormente.")
+            else:
+                messagebox.showinfo("Asignación de Puesto", f"Se ha asignado el puesto {puesto_libre} al vehículo.")
+                puestos_ocupados.insert(0,{puesto_libre: my_placa})
+            
         else:
-            print("El parqueadero está lleno, no hay puestos disponibles.")
+            messagebox.showwarning("Parqueadero lleno", "El parqueadero está lleno, no hay puestos disponibles.")
+
     elif opcion == "2":
         mostrar_parqueadero(parqueadero, puestos_ocupados)
     elif opcion == "3":
@@ -110,12 +127,14 @@ while True:
                 puestos_ocupados.remove(puesto)
                 puesto_libre = Puesto(nivel, numero)
                 ingresar_puesto_libre(parqueadero, puesto_libre)
-                print(f"Vehículo con placa {placa_eliminar} eliminado del parqueadero. El puesto ahora está libre.")
+                messagebox.showinfo("Eliminación placa vehiculo", f"Vehículo con placa {placa_eliminar} eliminado del parqueadero")
                 break
         else:
-            print(f"No se encontró ningún vehículo con placa {placa_eliminar} en el parqueadero.")
+            messagebox.showwarning("Placa no encontrada", f"No se encontró ningún vehículo con placa {placa_eliminar} en el parqueadero.")
+
     elif opcion == "4":
         print("¡Hasta luego!")
         break
     else:
-        print("Opción no válida. Por favor, seleccione una opción válida.")
+        messagebox.showerror("Opción  inválida", "Opción  inválida. Por favor seleccione una opción válida.")
+
