@@ -3,6 +3,7 @@ from tkinter import messagebox
 from collections import namedtuple
 
 Puesto = namedtuple('Puesto', 'nivel numero')
+Placa = namedtuple('Placa', 'nivel numero placa')
 
 class Stack:
     def __init__(self):
@@ -22,7 +23,7 @@ class Stack:
 
     def push(self, x):
         self.stack.append(x)
-
+        
     def pop(self):
         return self.stack.pop()
 
@@ -42,11 +43,18 @@ def crear_parqueadero(numero_niveles, cantidad_puestos):
 def obtener_puesto_libre(parqueadero):
     if parqueadero.isEmpty():
         return None
-    return parqueadero.pop()
+    
+    for i in range(len(parqueadero.stack) - 1, -1, -1):
+        if not isinstance(parqueadero.stack[i], Placa):
+            elemento_eliminado = parqueadero.stack.pop(i)
+            return elemento_eliminado
+            #print(f"Se eliminó el elemento: {elemento_eliminado}")
+   
 
+    
 
-def ingresar_puesto_libre(parqueadero, puesto):
-    parqueadero.push(puesto)
+def ingresar_puesto_libre(parqueadero, puesto, libre):
+    parqueadero.stack.insert(libre, puesto)
 
 
 
@@ -62,24 +70,28 @@ def mostrar_parqueadero(parqueadero, puestos_ocupados):
     total.append(puestos_ocupados)
 
     current_nivel = None
-    for row in total:
+    for row in parqueadero.stack:
+        print(row)
         for item in row:
-            if isinstance(item, dict):
-                key, value = list(item.items())[0]
-                if key.nivel != current_nivel:
-                    text_widget.insert(tk.END, "\n")  # Salto de línea si el nivel ha cambiado
-                    current_nivel = key.nivel
-                text_widget.insert(tk.END, f"Nivel {key.nivel} {value} ", "nivel")
-            elif isinstance(item, Puesto):
-                if item.nivel != current_nivel:
-                    text_widget.insert(tk.END, "\n")  # Salto de línea si el nivel ha cambiado
-                    current_nivel = item.nivel
-                text_widget.insert(tk.END, f"Nivel {item.nivel} Puesto {item.numero} ", "puesto")
+            pass
+            # if isinstance(item, int):
+            #     key, value = list(item.items())[0]
+            #     if key.nivel != current_nivel:
+            #         text_widget.insert(tk.END, "\n")  # Salto de línea si el nivel ha cambiado
+            #         current_nivel = key.nivel
+            #     text_widget.insert(tk.END, f"Nivel {key.nivel} {value} ", "nivel")
+            # elif isinstance(item, Puesto):
+            #     print('entra en elifff')
+            #     if item.nivel != current_nivel:
+            #         text_widget.insert(tk.END, "\n")  # Salto de línea si el nivel ha cambiado
+            #         current_nivel = item.nivel
+            #     text_widget.insert(tk.END, f"Nivel {item.nivel} Puesto {item.numero} ", "puesto")
 
     # Configuración de colores
-    text_widget.tag_config("nivel", foreground="blue")  # Color para los niveles
-    text_widget.tag_config("puesto", foreground="black")  # Color para los puestos
+    #text_widget.tag_config("nivel", foreground="blue")  # Color para los niveles
+    #text_widget.tag_config("puesto", foreground="black")  # Color para los puestos
     window.mainloop()
+
 
 
 def menu():
@@ -100,11 +112,14 @@ while True:
 
     if opcion == "1":
         puesto_libre = obtener_puesto_libre(parqueadero)
+        print('puesto libre')
+        print(puesto_libre)
+        
         if puesto_libre:
             my_placa = input('Ingrese la placa del vehiculo: ')
             placa_ya_ingresada = False
-            for puestos in puestos_ocupados:
-                if my_placa in puestos.values():
+            for puestos in parqueadero.stack:
+                if my_placa in puestos:
                     placa_ya_ingresada = True
                     break
         
@@ -113,6 +128,9 @@ while True:
             else:
                 messagebox.showinfo("Asignación de Puesto", f"Se ha asignado el puesto {puesto_libre} al vehículo.")
                 puestos_ocupados.insert(0,{puesto_libre: my_placa})
+                placa= Placa(puesto_libre.nivel, puesto_libre.numero, my_placa)
+                parqueadero.push(placa)
+                
             
         else:
             messagebox.showwarning("Parqueadero lleno", "El parqueadero está lleno, no hay puestos disponibles.")
@@ -121,12 +139,18 @@ while True:
         mostrar_parqueadero(parqueadero, puestos_ocupados)
     elif opcion == "3":
         placa_eliminar = input("Ingrese la placa del vehículo a eliminar: ")
-        for puesto in puestos_ocupados:
-            if placa_eliminar in puesto.values():
-                nivel, numero = list(puesto.keys())[0]
-                puestos_ocupados.remove(puesto)
-                puesto_libre = Puesto(nivel, numero)
-                ingresar_puesto_libre(parqueadero, puesto_libre)
+        index = 0
+        for puesto in parqueadero.stack:
+            index+=1
+            if placa_eliminar in puesto:
+                #nivel, numero = list(puesto)
+                print(f'Puesto => {puesto}')
+                #puestos_ocupados.remove(puesto)
+                puesto_libre = Puesto(puesto.nivel, puesto.numero)
+                print(f'PUesto libre => {puesto_libre}')
+                print(f'INdex => {index}')
+                ingresar_puesto_libre(parqueadero, puesto_libre, index)
+                parqueadero.stack.remove(puesto)
                 messagebox.showinfo("Eliminación placa vehiculo", f"Vehículo con placa {placa_eliminar} eliminado del parqueadero")
                 break
         else:
