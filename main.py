@@ -57,7 +57,7 @@ def obtener_puesto_libre(parqueadero):
         if not isinstance(parqueadero.stack[i], Placa):
             elemento_eliminado = parqueadero.stack.pop(i)
             return elemento_eliminado
-            #print(f"Se eliminó el elemento: {elemento_eliminado}")
+            
    
 
     
@@ -68,35 +68,27 @@ def ingresar_puesto_libre(parqueadero, puesto, libre):
 
 
 def mostrar_parqueadero(parqueadero, puestos_ocupados):
-    window = tk.Tk()
-    window.title("Parqueadero")
+    # window = tk.Tk()
+    # window.title("Parqueadero")
 
-    text_widget = tk.Text(window, height=10, width=70)
-    text_widget.pack()
-
+    # text_widget = tk.Text(window, height=10, width=70)
+    # text_widget.pack()
 
     current_nivel = None
-    for row in parqueadero.stack:
-        print(row)
-        for item in row:
-            pass
-            # if isinstance(item, int):
-            #     key, value = list(item.items())[0]
-            #     if key.nivel != current_nivel:
-            #         text_widget.insert(tk.END, "\n")  # Salto de línea si el nivel ha cambiado
-            #         current_nivel = key.nivel
-            #     text_widget.insert(tk.END, f"Nivel {key.nivel} {value} ", "nivel")
-            # elif isinstance(item, Puesto):
-            #     print('entra en elifff')
-            #     if item.nivel != current_nivel:
-            #         text_widget.insert(tk.END, "\n")  # Salto de línea si el nivel ha cambiado
-            #         current_nivel = item.nivel
-            #     text_widget.insert(tk.END, f"Nivel {item.nivel} Puesto {item.numero} ", "puesto")
+    for item in parqueadero.stack:
+        print(item)
+        # if isinstance(item, Puesto):
+        #     if item.nivel != current_nivel:
+        #         text_widget.insert(tk.END, "\n")
+        #         current_nivel = item.nivel
+        #     text_widget.insert(tk.END, f"Nivel {item.nivel} Puesto {item.numero} ", "puesto")
+        # elif isinstance(item, Placa):
+        #     text_widget.insert(tk.END, f"Placa {item.placa} en Nivel {item.nivel} Puesto {item.numero}\n", "placa")
 
     # Configuración de colores
-    #text_widget.tag_config("nivel", foreground="blue")  # Color para los niveles
-    #text_widget.tag_config("puesto", foreground="black")  # Color para los puestos
-    window.mainloop()
+    # text_widget.tag_config("puesto", foreground="black")  # Color para los puestos
+    # text_widget.tag_config("placa", foreground="green")  # Color para las placas
+    # window.mainloop()
 
 
 
@@ -136,19 +128,20 @@ while True:
                 messagebox.showinfo("Asignación de Puesto", f"Se ha asignado el puesto {puesto_libre} al vehículo.")
                 puestos_ocupados.insert(0,{puesto_libre: my_placa})
                 placa= Placa(puesto_libre.nivel, puesto_libre.numero, my_placa)
+                print(f'Longitud => {len(parqueadero.stack)}')
                 for puesto in reversed(parqueadero.stack):
+                    
                     current_index-= 1
-                
-                    print(f'index => {current_index}')
+                    #print(f'index => {current_index}')
+                    print(f'Puesto => {puesto} Index => {current_index}')
                     if isinstance(puesto, Puesto):
                         parqueadero.push(placa)
-                        messagebox.showinfo("Entra", f"Entra con condicion if")
                         current_index = 0
-
+                        print('ENTRA EN IF ****')
                         break
                     else:
                         parqueadero.stack.insert(current_index, placa)
-                        messagebox.showinfo("Entra", f"Entra con condicion else")
+                        print('ENTRA EN ELSE ******')
                         break
                 
                 
@@ -159,14 +152,15 @@ while True:
         mostrar_parqueadero(parqueadero, puestos_ocupados)
     elif opcion == "3":
         placa_eliminar = input("Ingrese la placa del vehículo a eliminar: ")
-        current_index = 0
         index = 0
         for puesto in parqueadero.stack:
             index+=1
             if placa_eliminar in puesto:
                 puesto_libre = Puesto(puesto.nivel, puesto.numero)
+                current_index= - (len(parqueadero.stack) - (index + 1))
                 ingresar_puesto_libre(parqueadero, puesto_libre, index)
                 parqueadero.stack.remove(puesto)
+                
                 messagebox.showinfo("Eliminación placa vehiculo", f"Vehículo con placa {placa_eliminar} eliminado del parqueadero")
                 break
         else:
