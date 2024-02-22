@@ -1,3 +1,4 @@
+
 import tkinter as tk
 from tkinter import messagebox
 from collections import namedtuple
@@ -28,15 +29,23 @@ class Stack:
         return self.stack.pop()
 
 
+
+# def crear_parqueadero(numero_niveles, cantidad_puestos):
+#     parqueadero = Stack()
+#     cont_niveles = 1
+#     while cont_niveles <= numero_niveles:
+#         cont_vehiculos = cantidad_puestos
+#         while cont_vehiculos >= 1:
+#             parqueadero.push(Puesto(cont_niveles, cont_vehiculos))
+#             cont_vehiculos -= 1
+#         cont_niveles += 1
+#     return parqueadero
+
 def crear_parqueadero(numero_niveles, cantidad_puestos):
     parqueadero = Stack()
-    cont_niveles = 1
-    while cont_niveles <= numero_niveles:
-        cont_vehiculos = 1
-        while cont_vehiculos <= cantidad_puestos:
-            parqueadero.push(Puesto(cont_niveles, cont_vehiculos))
-            cont_vehiculos += 1
-        cont_niveles += 1
+    for nivel in range(1, numero_niveles + 1):
+        for numero in range(1, cantidad_puestos + 1):
+            parqueadero.push(Puesto(nivel, numero))
     return parqueadero
 
 
@@ -65,9 +74,6 @@ def mostrar_parqueadero(parqueadero, puestos_ocupados):
     text_widget = tk.Text(window, height=10, width=70)
     text_widget.pack()
 
-    total = []
-    total.append(parqueadero.stack)
-    total.append(puestos_ocupados)
 
     current_nivel = None
     for row in parqueadero.stack:
@@ -122,6 +128,8 @@ while True:
                 if my_placa in puestos:
                     placa_ya_ingresada = True
                     break
+                
+                
         
             if placa_ya_ingresada:
                 messagebox.showwarning("Placa ya ingresada", f"La placa {my_placa} ya ha sido ingresada anteriormente.")
@@ -129,9 +137,18 @@ while True:
                 messagebox.showinfo("Asignación de Puesto", f"Se ha asignado el puesto {puesto_libre} al vehículo.")
                 puestos_ocupados.insert(0,{puesto_libre: my_placa})
                 placa= Placa(puesto_libre.nivel, puesto_libre.numero, my_placa)
-                parqueadero.push(placa)
                 
-            
+                index = 0 
+                for puesto in reversed(parqueadero.stack):
+                    index-=1
+                    if isinstance(puesto, Puesto):
+                        parqueadero.push(placa)
+                        break
+                    else:
+                        parqueadero.stack.insert(index, placa)
+                        break
+                
+                
         else:
             messagebox.showwarning("Parqueadero lleno", "El parqueadero está lleno, no hay puestos disponibles.")
 
